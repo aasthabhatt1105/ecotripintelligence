@@ -15,6 +15,7 @@ import {
 } from "../lib/ecoUtils";
 import TransportSelector from "../components/TransportSelector";
 import TrackingStats from "../components/TrackingStats";
+import { useStepCounter } from "../hooks/useStepCounter";
 
 function MapUpdater({ center }) {
   const map = useMap();
@@ -39,6 +40,8 @@ export default function LiveTracking() {
 
   const watchRef = useRef(null);
   const timerRef = useRef(null);
+
+  const { steps, supported: stepSupported } = useStepCounter(tracking);
 
   // Get initial position
   useEffect(() => {
@@ -214,6 +217,8 @@ export default function LiveTracking() {
               co2Saved={co2Saved}
               points={points}
               elapsed={elapsed}
+              steps={steps}
+              showSteps={stepSupported}
             />
           )}
 
