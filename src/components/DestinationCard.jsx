@@ -166,7 +166,7 @@ function SatelliteView({ data }) {
       </div>
 
       {/* Map */}
-      <div className="rounded-2xl border border-border/50 relative" style={{ height: "224px" }}>
+      <div className="rounded-2xl border border-border/50 relative" style={{ height: "224px", overflow: "hidden" }}>
         <MapContainer
           key={`${activeLayer}-${dateStr}-${lat}-${lng}`}
           center={[lat, lng]}
