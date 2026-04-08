@@ -30,26 +30,30 @@ const SATELLITE_LAYERS = [
   {
     id: "truecolor",
     label: "True Color",
-    getUrl: (date) => gibsUrl("MODIS_Terra_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
-    desc: "NASA MODIS Terra · Daily",
+    getUrl: (date) => gibsUrl("VIIRS_NOAA20_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
+    desc: "NASA VIIRS NOAA-20 · 375m · Daily",
+    maxZoom: 9,
   },
   {
     id: "viirs",
-    label: "VIIRS",
-    getUrl: (date) => gibsUrl("VIIRS_NOAA20_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
-    desc: "NASA VIIRS NOAA-20 · Daily",
+    label: "VIIRS Day",
+    getUrl: (date) => gibsUrl("VIIRS_SNPP_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
+    desc: "NASA VIIRS Suomi NPP · 375m · Daily",
+    maxZoom: 9,
   },
   {
     id: "vegetation",
     label: "Vegetation",
-    getUrl: (date) => gibsUrl("MODIS_Terra_NDVI_8Day", date, "GoogleMapsCompatible_Level7", "png"),
-    desc: "NASA NDVI 8-Day · MODIS",
+    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
+    desc: "Esri World Imagery · High Resolution",
+    maxZoom: 19,
   },
   {
     id: "fires",
     label: "Fires",
     getUrl: (date) => gibsUrl("MODIS_Terra_Thermal_Anomalies_All", date, "GoogleMapsCompatible_Level8", "png"),
     desc: "NASA Thermal Anomalies · Daily",
+    maxZoom: 8,
   },
 ];
 
@@ -73,7 +77,7 @@ function SatelliteView({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeLayer, setActiveLayer] = useState("truecolor");
-  const [zoom] = useState(11);
+  const [zoom] = useState(13);
 
   const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
   const dateStr = format(selectedDate, "yyyy-MM-dd");
@@ -165,8 +169,8 @@ function SatelliteView({ data }) {
         >
           <TileLayer
             url={tileUrl}
-            attribution={`Imagery © <a href="https://earthdata.nasa.gov">NASA EOSDIS GIBS</a> — ${layer.desc}`}
-            maxZoom={9}
+            attribution={`Imagery © ${layer.desc}`}
+            maxZoom={layer.maxZoom}
             tileSize={256}
           />
           <CircleMarker
@@ -195,7 +199,7 @@ function SatelliteView({ data }) {
             { label: "Vegetation", value: `${displayVeg}%`, icon: "🛰️", sub: "Coverage" },
             { label: "Urban", value: `${data.satellite?.urban_density_pct ?? "—"}%`, icon: "🏙️", sub: "Density" },
             { label: "Water", value: `${data.satellite?.water_coverage_pct ?? "—"}%`, icon: "💧", sub: "Coverage" },
-            { label: "Resolution", value: "250m", icon: "📷", sub: "MODIS/VIIRS" },
+            { label: "Resolution", value: "375m", icon: "📷", sub: "VIIRS/Esri" },
           ].map((item) => (
             <div key={item.label} className="bg-card rounded-xl p-2 text-center border border-border/30">
               <div className="text-base mb-0.5">{item.icon}</div>
