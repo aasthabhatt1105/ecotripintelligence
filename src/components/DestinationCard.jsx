@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import { Wind, Droplets, Thermometer, Eye, Gauge, Sun, Leaf, Factory, Car, Satellite, MapPin } from "lucide-react";
 
 const AQI_COLORS = {
@@ -34,17 +35,29 @@ function PollutantBar({ label, value, max, unit }) {
 
 function SatelliteMap({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
-  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.5}%2C${lat - 0.5}%2C${lng + 0.5}%2C${lat + 0.5}&layer=mapnik&marker=${lat}%2C${lng}`;
+  const zoom = 11;
 
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl overflow-hidden border border-border/50 h-44">
-        <iframe
-          src={mapUrl}
-          className="w-full h-full"
-          title="Destination Map"
-          loading="lazy"
-        />
+      <div className="rounded-2xl overflow-hidden border border-border/50 h-52 relative">
+        <MapContainer
+          center={[lat, lng]}
+          zoom={zoom}
+          className="h-full w-full"
+          zoomControl={false}
+          scrollWheelZoom={false}
+        >
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="Tiles &copy; Esri"
+            maxZoom={18}
+          />
+          <CircleMarker
+            center={[lat, lng]}
+            radius={8}
+            pathOptions={{ color: "#fff", fillColor: "#4CAF50", fillOpacity: 1, weight: 3 }}
+          />
+        </MapContainer>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {[
