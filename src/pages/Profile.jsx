@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Leaf, TreePine, Zap, Route, Award, LogOut, TrendingUp, Camera, Loader2 } from "lucide-react";
+import { Leaf, TreePine, Zap, Route, Award, LogOut, TrendingUp, Camera, Loader2, Gift } from "lucide-react";
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import EcoScoreCircle from "../components/EcoScoreCircle";
 import AchievementBadge from "../components/AchievementBadge";
+import BadgeClaimModal from "../components/BadgeClaimModal";
 import { getEcoGrade, co2ToTrees, ACHIEVEMENTS } from "../lib/ecoUtils";
 
 export default function Profile() {
@@ -15,6 +16,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("stats");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [badgeEligible, setBadgeEligible] = useState(false);
+  const [badgePoints, setBadgePoints] = useState(0);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
   const photoInputRef = useRef(null);
 
   useEffect(() => {
@@ -27,6 +31,12 @@ export default function Profile() {
       setUser(me);
       setTrips(allTrips);
       setAchievements(allAchievements);
+
+      // Check badge eligibility
+      const badgeCheck = await base44.functions.invoke('checkBadgeEligibility', {});
+      setBadgeEligible(badgeCheck.data.eligible);
+      setBadgePoints(badgeCheck.data.totalPoints);
+      
       setLoading(false);
     }
     load();
@@ -134,6 +144,33 @@ export default function Profile() {
         ))}
       </div>
 
+      {/* Badge Claim Banner */}
+      {badgeEligible && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-3xl border border-primary/20 p-5"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <Gift className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Claim Your Champion Badge! 🏆</p>
+                <p className="text-xs text-muted-foreground">You've reached {badgePoints} eco points</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowBadgeModal(true)}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Claim Now
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 bg-muted/50 rounded-2xl p-1">
         {[
@@ -212,6 +249,13 @@ export default function Profile() {
           </div>
         </motion.div>
       )}
+
+      {/* Badge Claim Modal */}
+      <BadgeClaimModal
+        eligible={badgeEligible}
+        onClose={() => setShowBadgeModal(false)}
+        totalPoints={badgePoints}
+      />
     </div>
   );
 }

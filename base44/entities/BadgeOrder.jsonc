@@ -1,0 +1,58 @@
+{
+  "name": "BadgeOrder",
+  "type": "object",
+  "properties": {
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "eco_champion_2000"
+      ],
+      "default": "eco_champion_2000"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "claimed",
+        "processing",
+        "shipped",
+        "delivered"
+      ],
+      "default": "claimed"
+    },
+    "recipient_name": {
+      "type": "string"
+    },
+    "street_address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state_province": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "claimed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tracking_number": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "badge_type",
+    "recipient_name",
+    "street_address",
+    "city",
+    "country"
+  ]
+}
