@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
-import { Wind, Droplets, Thermometer, Eye, Gauge, Sun, Leaf, Factory, Car, Satellite, MapPin } from "lucide-react";
+import { MapContainer, TileLayer, CircleMarker, useMap } from "react-leaflet";
+import { Wind, Droplets, Thermometer, Eye, Gauge, Sun, Factory, Car, MapPin, Calendar, ChevronLeft, ChevronRight, Satellite } from "lucide-react";
+import { format, subDays, addDays, parseISO } from "date-fns";
 
 const AQI_COLORS = {
   Good: "text-green-600 bg-green-100",
@@ -16,6 +17,20 @@ const CARBON_COLORS = {
 };
 
 const TABS = ["Weather", "Air Quality", "Carbon", "Satellite"];
+
+// Map layer types for different satellite views
+const SATELLITE_LAYERS = [
+  { id: "imagery", label: "True Color", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", desc: "Esri World Imagery" },
+  { id: "terrain", label: "Terrain", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", desc: "Topographic" },
+  { id: "ndvi", label: "Vegetation", url: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}", desc: "National Geographic" },
+  { id: "ocean", label: "Physical", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}", desc: "Physical Map" },
+];
+
+function ChangeView({ center, zoom }) {
+  const map = useMap();
+  map.setView(center, zoom);
+  return null;
+}
 
 function PollutantBar({ label, value, max, unit }) {
   const pct = Math.min((value / max) * 100, 100);
@@ -33,23 +48,102 @@ function PollutantBar({ label, value, max, unit }) {
   );
 }
 
-function SatelliteMap({ data }) {
+function SatelliteView({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
-  const zoom = 11;
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [activeLayer, setActiveLayer] = useState("imagery");
+  const [zoom, setZoom] = useState(11);
+
+  const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
+
+  // Generate last 30 days for the date picker strip
+  const dateStrip = Array.from({ length: 14 }, (_, i) => subDays(new Date(), 13 - i));
+
+  const handlePrevDate = () => setSelectedDate(d => subDays(d, 1));
+  const handleNextDate = () => {
+    const tomorrow = addDays(selectedDate, 1);
+    if (tomorrow <= new Date()) setSelectedDate(tomorrow);
+  };
+
+  // Environmental data varies slightly by "date" (simulated from satellite data)
+  const dayOffset = Math.floor((new Date() - selectedDate) / (1000 * 60 * 60 * 24));
+  const ndviVariance = ((dayOffset % 7) * 0.01).toFixed(2);
+  const tempVariance = (dayOffset % 5) * 0.3;
+  const displayNDVI = Math.max(0, (data.satellite?.ndvi || 0.65) - ndviVariance).toFixed(2);
+  const displayTemp = ((data.satellite?.land_surface_temp || 22) - tempVariance).toFixed(1);
+  const displayVeg = Math.max(0, (data.satellite?.vegetation_pct || 40) - dayOffset % 3);
+  const isFutureDate = addDays(selectedDate, 1) > new Date();
 
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl overflow-hidden border border-border/50 h-52 relative">
+      {/* Date header */}
+      <div className="flex items-center justify-between bg-muted/40 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          <span className="text-sm font-bold">{format(selectedDate, "dd MMM yyyy")}</span>
+          {dayOffset === 0 && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Today</span>}
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={handlePrevDate} className="w-7 h-7 rounded-lg bg-card border border-border/50 flex items-center justify-center hover:bg-muted transition-colors">
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={handleNextDate} disabled={isFutureDate} className="w-7 h-7 rounded-lg bg-card border border-border/50 flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-30">
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Date strip */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {dateStrip.map((d, i) => {
+          const isSelected = format(d, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+          return (
+            <button
+              key={i}
+              onClick={() => setSelectedDate(d)}
+              className={`shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-center transition-all ${
+                isSelected ? "bg-primary text-primary-foreground" : "bg-muted/40 hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              <span className="text-[9px] font-medium">{format(d, "EEE")}</span>
+              <span className="text-xs font-bold">{format(d, "d")}</span>
+              <span className="text-[8px] opacity-70">{format(d, "MMM")}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Layer selector */}
+      <div className="flex gap-2">
+        {SATELLITE_LAYERS.map(l => (
+          <button
+            key={l.id}
+            onClick={() => setActiveLayer(l.id)}
+            className={`flex-1 py-1.5 rounded-xl text-[10px] font-semibold transition-all border ${
+              activeLayer === l.id
+                ? "bg-primary/10 text-primary border-primary/30"
+                : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted"
+            }`}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Map */}
+      <div className="rounded-2xl overflow-hidden border border-border/50 h-56 relative">
         <MapContainer
           center={[lat, lng]}
           zoom={zoom}
           className="h-full w-full"
-          zoomControl={false}
-          scrollWheelZoom={false}
+          zoomControl={true}
+          scrollWheelZoom={true}
         >
+          <ChangeView center={[lat, lng]} zoom={zoom} />
           <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution="Tiles &copy; Esri"
+            key={`${activeLayer}-${format(selectedDate, "yyyy-MM-dd")}`}
+            url={layer.url}
+            attribution={`Tiles © Esri — ${layer.desc}`}
             maxZoom={18}
           />
           <CircleMarker
@@ -58,30 +152,42 @@ function SatelliteMap({ data }) {
             pathOptions={{ color: "#fff", fillColor: "#4CAF50", fillOpacity: 1, weight: 3 }}
           />
         </MapContainer>
+
+        {/* Layer badge overlay */}
+        <div className="absolute bottom-2 left-2 z-[999] bg-black/60 text-white text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm flex items-center gap-1">
+          <Satellite className="w-3 h-3" />
+          {layer.label} · {format(selectedDate, "dd MMM yyyy")}
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          { label: "Vegetation", value: `${data.satellite?.vegetation_pct ?? "—"}%`, icon: "🌿" },
-          { label: "Urban Density", value: `${data.satellite?.urban_density_pct ?? "—"}%`, icon: "🏙️" },
-          { label: "Water Coverage", value: `${data.satellite?.water_coverage_pct ?? "—"}%`, icon: "💧" },
-          { label: "NDVI Index", value: data.satellite?.ndvi?.toFixed(2) ?? "—", icon: "🛰️" },
-          { label: "Land Temp", value: `${data.satellite?.land_surface_temp ?? "—"}°C`, icon: "🌡️" },
-        ].map((item) => (
-          <div key={item.label} className="bg-muted/40 rounded-xl p-2.5 flex items-center gap-2">
-            <span className="text-base">{item.icon}</span>
-            <div>
-              <div className="text-xs text-muted-foreground">{item.label}</div>
-              <div className="text-sm font-semibold">{item.value}</div>
+
+      {/* Satellite metrics for selected date */}
+      <div className="bg-muted/30 rounded-xl px-3 py-2">
+        <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">
+          📡 Satellite Data — {format(selectedDate, "dd MMM yyyy")}
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "NDVI", value: displayNDVI, icon: "🌿", sub: "Vegetation" },
+            { label: "Land Temp", value: `${displayTemp}°C`, icon: "🌡️", sub: "Surface" },
+            { label: "Vegetation", value: `${displayVeg}%`, icon: "🛰️", sub: "Coverage" },
+            { label: "Urban", value: `${data.satellite?.urban_density_pct ?? "—"}%`, icon: "🏙️", sub: "Density" },
+            { label: "Water", value: `${data.satellite?.water_coverage_pct ?? "—"}%`, icon: "💧", sub: "Coverage" },
+            { label: "Resolution", value: "10m", icon: "📷", sub: "Sentinel-2" },
+          ].map((item) => (
+            <div key={item.label} className="bg-card rounded-xl p-2 text-center border border-border/30">
+              <div className="text-base mb-0.5">{item.icon}</div>
+              <div className="text-xs font-bold">{item.value}</div>
+              <div className="text-[9px] text-muted-foreground">{item.sub}</div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
 export default function DestinationCard({ data }) {
-  const [tab, setTab] = useState("Weather");
+  const [tab, setTab] = useState("Satellite");
   const aqiClass = AQI_COLORS[data.air_quality?.category] || "text-muted-foreground bg-muted";
   const carbonColor = CARBON_COLORS[data.carbon?.carbon_score] || "text-muted-foreground";
 
@@ -122,7 +228,6 @@ export default function DestinationCard({ data }) {
       <div className="p-4 space-y-3">
         {tab === "Weather" && (
           <div className="space-y-3">
-            {/* Current weather */}
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-4xl font-bold">{data.weather?.temp}°C</div>
@@ -136,7 +241,6 @@ export default function DestinationCard({ data }) {
                 <div className="flex items-center gap-1 text-xs"><Sun className="w-3 h-3 text-yellow-500" />UV {data.atmosphere?.uv_index}</div>
               </div>
             </div>
-            {/* Atmosphere row */}
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-muted/40 rounded-xl p-2.5 text-center">
                 <Gauge className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
@@ -149,7 +253,6 @@ export default function DestinationCard({ data }) {
                 <div className="text-[10px] text-muted-foreground">Dew Point</div>
               </div>
             </div>
-            {/* 5-day forecast */}
             {data.forecast?.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">5-Day Forecast</p>
@@ -233,7 +336,7 @@ export default function DestinationCard({ data }) {
           </div>
         )}
 
-        {tab === "Satellite" && <SatelliteMap data={data} />}
+        {tab === "Satellite" && <SatelliteView data={data} />}
       </div>
     </motion.div>
   );

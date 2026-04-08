@@ -58,6 +58,12 @@ export default function Dashboard() {
         </p>
       </motion.div>
 
+      {/* 🛰️ Satellite Explorer — TOP SECTION */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <h2 className="text-lg font-bold mb-3">🛰️ Satellite Explorer</h2>
+        <DestinationSearch />
+      </motion.div>
+
       {/* Score + Stats Row */}
       <div className="grid grid-cols-4 gap-4">
         <motion.div
@@ -102,32 +108,25 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Destination Explorer + Recent Trips */}
-      <div className="grid grid-cols-2 gap-6 items-start">
-        <div>
-          <h2 className="text-lg font-bold mb-3">🔍 Explore Destination</h2>
-          <DestinationSearch />
+      {/* Recent Trips */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold">Recent Trips</h2>
+          <span className="text-xs text-muted-foreground">{trips.length} total</span>
         </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">Recent Trips</h2>
-            <span className="text-xs text-muted-foreground">{trips.length} total</span>
+        {trips.length === 0 ? (
+          <div className="text-center py-12 bg-card rounded-3xl border border-border/50">
+            <Navigation className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No trips yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Start tracking to see your impact!</p>
           </div>
-          {trips.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-3xl border border-border/50">
-              <Navigation className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No trips yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Start tracking to see your impact!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {trips.slice(0, 5).map((trip) => (
-                <TripCard key={trip.id} trip={trip} />
-              ))}
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {trips.slice(0, 6).map((trip) => (
+              <TripCard key={trip.id} trip={trip} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
