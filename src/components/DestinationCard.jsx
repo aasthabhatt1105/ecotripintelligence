@@ -72,7 +72,7 @@ function PollutantBar({ label, value, max, unit }) {
 function SatelliteView({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [activeLayer, setActiveLayer] = useState("imagery");
+  const [activeLayer, setActiveLayer] = useState("truecolor");
   const [zoom] = useState(11);
 
   const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
