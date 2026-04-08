@@ -152,7 +152,7 @@ Make it realistic, detailed, and focused on eco-friendly options. Include local 
   };
 
   return (
-    <div className="flex flex-col h-screen max-h-screen">
+    <div className="flex flex-col h-[calc(100vh-80px)]">
       {/* Header */}
       <div className="px-5 pt-6 pb-3">
         <div className="flex items-center gap-3">
@@ -248,7 +248,7 @@ Make it realistic, detailed, and focused on eco-friendly options. Include local 
       </div>
 
       {/* Input */}
-      <div className="px-5 pb-28 pt-2">
+      <div className="px-5 pb-6 pt-2">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={input}

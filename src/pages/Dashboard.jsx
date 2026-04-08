@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Leaf, TreePine, Zap, Navigation, MessageSquare, Plus } from "lucide-react";
+import { Leaf, TreePine, Zap, Navigation, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import EcoScoreCircle from "../components/EcoScoreCircle";
 import StatsCard from "../components/StatsCard";
@@ -35,85 +35,50 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="px-5 pt-6 pb-4 space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">EcoTrip</h1>
-          <p className="text-sm text-muted-foreground">
-            Hello, {user?.full_name?.split(" ")[0] || "Explorer"} 🌱
-          </p>
-        </div>
-        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <Leaf className="w-5 h-5 text-primary" />
-        </div>
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Welcome back, {user?.full_name?.split(" ")[0] || "Explorer"} 🌱
+        </p>
       </motion.div>
 
-      {/* Eco Score */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="flex justify-center"
-      >
-        <EcoScoreCircle grade={grade} points={totalPoints} />
-      </motion.div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatsCard
-          icon={<Leaf className="w-4 h-4" />}
-          label="CO₂ Saved"
-          value={totalCO2.toFixed(1)}
-          unit="kg"
-          color="primary"
-          delay={0.15}
-        />
-        <StatsCard
-          icon={<TreePine className="w-4 h-4" />}
-          label="Trees Equiv."
-          value={trees}
-          color="emerald"
-          delay={0.2}
-        />
-        <StatsCard
-          icon={<Zap className="w-4 h-4" />}
-          label="Eco Points"
-          value={totalPoints}
-          color="accent"
-          delay={0.25}
-        />
-      </div>
-
-      {/* Destination Search */}
-      <div>
-        <h2 className="text-base font-bold mb-3">🔍 Explore Destination</h2>
-        <DestinationSearch />
+      {/* Score + Stats Row */}
+      <div className="grid grid-cols-4 gap-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-card rounded-3xl border border-border/50 p-6 flex flex-col items-center justify-center shadow-sm"
+        >
+          <EcoScoreCircle grade={grade} points={totalPoints} />
+          <p className="text-xs text-muted-foreground mt-2 font-medium">Eco Score</p>
+        </motion.div>
+        <StatsCard icon={<Leaf className="w-4 h-4" />} label="CO₂ Saved" value={totalCO2.toFixed(1)} unit="kg" color="primary" delay={0.15} />
+        <StatsCard icon={<TreePine className="w-4 h-4" />} label="Trees Equiv." value={trees} color="emerald" delay={0.2} />
+        <StatsCard icon={<Zap className="w-4 h-4" />} label="Eco Points" value={totalPoints} color="accent" delay={0.25} />
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <Link to="/track">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-primary text-primary-foreground rounded-3xl p-5 shadow-lg shadow-primary/20"
+            className="bg-primary text-primary-foreground rounded-3xl p-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow cursor-pointer"
           >
-            <Navigation className="w-6 h-6 mb-3" />
-            <div className="font-bold text-sm">Start Tracking</div>
-            <div className="text-xs opacity-80 mt-0.5">Track your eco trip</div>
+            <Navigation className="w-7 h-7 mb-3" />
+            <div className="font-bold text-base">Start Tracking</div>
+            <div className="text-sm opacity-80 mt-0.5">Track your eco trip in real time</div>
           </motion.div>
         </Link>
         <Link to="/planner">
@@ -121,34 +86,41 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="bg-secondary text-secondary-foreground rounded-3xl p-5 shadow-lg shadow-secondary/20"
+            className="bg-secondary text-secondary-foreground rounded-3xl p-6 shadow-lg shadow-secondary/20 hover:shadow-xl hover:shadow-secondary/30 transition-shadow cursor-pointer"
           >
-            <MessageSquare className="w-6 h-6 mb-3" />
-            <div className="font-bold text-sm">AI Planner</div>
-            <div className="text-xs opacity-80 mt-0.5">Plan eco travel</div>
+            <MessageSquare className="w-7 h-7 mb-3" />
+            <div className="font-bold text-base">AI Planner</div>
+            <div className="text-sm opacity-80 mt-0.5">Plan your next eco adventure</div>
           </motion.div>
         </Link>
       </div>
 
-      {/* Recent Trips */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold">Recent Trips</h2>
-          <span className="text-xs text-muted-foreground">{trips.length} total</span>
+      {/* Destination Explorer + Recent Trips */}
+      <div className="grid grid-cols-2 gap-6 items-start">
+        <div>
+          <h2 className="text-lg font-bold mb-3">🔍 Explore Destination</h2>
+          <DestinationSearch />
         </div>
-        {trips.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-3xl border border-border/50">
-            <Navigation className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No trips yet</p>
-            <p className="text-xs text-muted-foreground mt-1">Start tracking to see your impact!</p>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold">Recent Trips</h2>
+            <span className="text-xs text-muted-foreground">{trips.length} total</span>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {trips.slice(0, 5).map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
-            ))}
-          </div>
-        )}
+          {trips.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-3xl border border-border/50">
+              <Navigation className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No trips yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Start tracking to see your impact!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {trips.slice(0, 5).map((trip) => (
+                <TripCard key={trip.id} trip={trip} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

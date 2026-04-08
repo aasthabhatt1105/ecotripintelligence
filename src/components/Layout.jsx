@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Home, Navigation, MessageSquare, User } from "lucide-react";
+import { Home, Navigation, MessageSquare, User, Leaf } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
@@ -13,14 +13,17 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col min-h-screen max-w-md mx-auto relative bg-background">
-      <main className="flex-1 overflow-y-auto pb-24">
-        <Outlet />
-      </main>
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-50 w-full glass border-b border-border/50 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Leaf className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-lg font-bold text-foreground">EcoTrip</span>
+        </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50">
-        <div className="glass border-t border-border/50 px-2 py-2 flex items-center justify-around">
+        <nav className="flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -28,32 +31,31 @@ export default function Layout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl transition-all"
+                className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
               >
                 {isActive && (
                   <motion.div
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-primary/10 rounded-2xl"
+                    className="absolute inset-0 bg-primary/10 rounded-xl"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
                 )}
-                <Icon
-                  className={`w-5 h-5 relative z-10 transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`}
-                />
-                <span
-                  className={`text-[10px] font-medium relative z-10 transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
+                <Icon className={`w-4 h-4 relative z-10 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`relative z-10 ${isActive ? "text-primary" : "text-muted-foreground"}`}>
                   {item.label}
                 </span>
               </Link>
             );
           })}
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          <Outlet />
         </div>
-      </nav>
+      </main>
     </div>
   );
 }
