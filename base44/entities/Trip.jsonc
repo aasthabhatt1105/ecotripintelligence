@@ -23,23 +23,19 @@
     },
     "distance_km": {
       "type": "number",
-      "default": 0,
-      "description": "Total distance in kilometers"
+      "default": 0
     },
     "co2_saved_kg": {
       "type": "number",
-      "default": 0,
-      "description": "CO2 saved vs car travel in kg"
+      "default": 0
     },
     "eco_points": {
       "type": "number",
-      "default": 0,
-      "description": "Eco points earned"
+      "default": 0
     },
     "duration_seconds": {
       "type": "number",
-      "default": 0,
-      "description": "Trip duration in seconds"
+      "default": 0
     },
     "start_lat": {
       "type": "number"
@@ -64,6 +60,10 @@
     "end_time": {
       "type": "string",
       "format": "date-time"
+    },
+    "photo_urls": {
+      "type": "string",
+      "description": "JSON array of uploaded photo URLs"
     }
   },
   "required": [

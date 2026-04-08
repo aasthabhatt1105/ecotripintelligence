@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { MapContainer, TileLayer, Polyline, CircleMarker } from "react-leaflet";
-import { ArrowLeft, Leaf, Route, Timer, Zap, Trash2, Share2, Footprints, Bike, Bus, TrainFront } from "lucide-react";
+import { ArrowLeft, Leaf, Route, Timer, Zap, Trash2, Share2, Footprints, Bike, Bus, TrainFront, Camera, Plus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { formatDistance, formatDuration } from "../lib/ecoUtils";
@@ -20,6 +20,13 @@ export default function TripDetail() {
   const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef(null);
+
+  const tripPhotos = (() => {
+    if (!trip?.photo_urls) return [];
+    try { return JSON.parse(trip.photo_urls); } catch { return []; }
+  })();
 
   useEffect(() => {
     async function load() {
@@ -29,6 +36,27 @@ export default function TripDetail() {
     }
     load();
   }, [id]);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const currentPhotos = (() => {
+      if (!trip?.photo_urls) return [];
+      try { return JSON.parse(trip.photo_urls); } catch { return []; }
+    })();
+    const newPhotos = [...currentPhotos, file_url];
+    await base44.entities.Trip.update(id, { photo_urls: JSON.stringify(newPhotos) });
+    setTrip((prev) => ({ ...prev, photo_urls: JSON.stringify(newPhotos) }));
+    setUploadingPhoto(false);
+  };
+
+  const handleDeletePhoto = async (urlToRemove) => {
+    const newPhotos = tripPhotos.filter((u) => u !== urlToRemove);
+    await base44.entities.Trip.update(id, { photo_urls: JSON.stringify(newPhotos) });
+    setTrip((prev) => ({ ...prev, photo_urls: JSON.stringify(newPhotos) }));
+  };
 
   const handleDelete = async () => {
     if (!confirm("Delete this trip?")) return;
@@ -143,6 +171,39 @@ export default function TripDetail() {
             <span className="text-primary font-semibold">{(trip.co2_saved_kg || 0).toFixed(2)}kg of CO₂</span>.
             That's equivalent to {((trip.co2_saved_kg || 0) / 22).toFixed(2)} trees absorbing carbon for a year! 🌳
           </p>
+        </div>
+
+        {/* Trip Photos */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold">📸 Trip Photos</h3>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-primary cursor-pointer bg-primary/10 px-3 py-1.5 rounded-xl hover:bg-primary/20 transition-colors">
+              {uploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+              Add Photo
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
+            </label>
+          </div>
+          {tripPhotos.length === 0 ? (
+            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-2xl p-6 text-center cursor-pointer hover:bg-muted/30 transition-colors">
+              <Camera className="w-8 h-8 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground">Upload photos from this trip</p>
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
+            </label>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {tripPhotos.map((url, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
+                  <img src={url} alt={`Trip photo ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => handleDeletePhoto(url)}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Actions */}

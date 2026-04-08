@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Leaf, TreePine, Zap, Route, Award, LogOut, Settings, TrendingUp } from "lucide-react";
+import { Leaf, TreePine, Zap, Route, Award, LogOut, TrendingUp, Camera, Loader2 } from "lucide-react";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import EcoScoreCircle from "../components/EcoScoreCircle";
@@ -13,6 +14,8 @@ export default function Profile() {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("stats");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -28,6 +31,16 @@ export default function Profile() {
     }
     load();
   }, []);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    await base44.auth.updateMe({ profile_photo_url: file_url });
+    setUser((prev) => ({ ...prev, profile_photo_url: file_url }));
+    setUploadingPhoto(false);
+  };
 
   const totalCO2 = trips.reduce((sum, t) => sum + (t.co2_saved_kg || 0), 0);
   const totalPoints = trips.reduce((sum, t) => sum + (t.eco_points || 0), 0);
@@ -78,7 +91,22 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-5"
       >
-        <EcoScoreCircle grade={grade} points={totalPoints} size="md" />
+        {/* Profile Photo */}
+        <div className="relative shrink-0">
+          <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+          <button onClick={() => photoInputRef.current?.click()} className="relative group">
+            {user?.profile_photo_url ? (
+              <img src={user.profile_photo_url} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-border/50" />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-dashed border-primary/30">
+                <Camera className="w-6 h-6 text-primary/60" />
+              </div>
+            )}
+            <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingPhoto ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Camera className="w-5 h-5 text-white" />}
+            </div>
+          </button>
+        </div>
         <div>
           <h2 className="text-lg font-bold">{user?.full_name || "Eco Explorer"}</h2>
           <p className="text-xs text-muted-foreground">{user?.email}</p>

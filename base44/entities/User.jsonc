@@ -8,29 +8,11 @@
         "admin",
         "user"
       ],
-      "description": "The role of the user in the app"
+      "default": "user"
     },
-    "bio": {
+    "profile_photo_url": {
       "type": "string",
-      "description": "Short bio or motivation for eco travel"
-    },
-    "preferred_transport": {
-      "type": "string",
-      "enum": [
-        "walking",
-        "cycling",
-        "electric_bus",
-        "train"
-      ],
-      "description": "Preferred transport mode"
-    },
-    "onboarded": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether the user has completed onboarding"
+      "description": "User profile photo URL"
     }
-  },
-  "required": [
-    "role"
-  ]
+  }
 }
