@@ -9,6 +9,7 @@ export default function DestinationSearch() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [loadingStep, setLoadingStep] = useState("");
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -16,69 +17,22 @@ export default function DestinationSearch() {
     setLoading(true);
     setResult(null);
 
-    const data = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are an environmental data expert. For the destination "${query}", provide comprehensive real-time-like data including:
-- Current weather conditions (temperature in Celsius, feels like, humidity %, wind speed km/h, description, weather icon emoji)
-- 5-day weather forecast (each day: date label like "Mon", temp high/low, description, icon emoji)
-- Air quality index (AQI value 0-500, category like Good/Moderate/Unhealthy/Hazardous, main pollutant)
-- Pollution levels: PM2.5 (µg/m³), PM10 (µg/m³), NO2 (µg/m³), O3 (µg/m³), CO (µg/m³)
-- Carbon footprint data: annual CO2 emissions per capita (tonnes), transport emissions index (0-100), industry emissions index (0-100), overall carbon score (A+ to F)
-- Atmosphere data: UV index (0-11+), visibility (km), pressure (hPa), dew point (°C)
-- Satellite environment description: vegetation coverage %, urban density %, water body coverage %, NDVI index (-1 to 1), land surface temperature (°C)
-- Eco travel tips: 3 short tips for eco-friendly travel to this destination
-Use realistic and accurate data based on the location. Return as JSON.`,
-      add_context_from_internet: true,
+    // Step 1: Fetch real weather + air quality from OpenWeatherMap
+    setLoadingStep("Fetching live weather & air quality...");
+    const weatherResp = await base44.functions.invoke("getWeather", { destination: query });
+    const weatherData = weatherResp.data;
+
+    // Step 2: Fetch carbon + satellite + eco tips from LLM (only what OWM doesn't provide)
+    setLoadingStep("Analyzing satellite & carbon data...");
+    const llmData = await base44.integrations.Core.InvokeLLM({
+      prompt: `For the destination "${query}" (${weatherData.country || ""}), provide:
+- Carbon footprint: annual CO2 emissions per capita (tonnes), transport emissions index (0-100), industry emissions index (0-100), carbon score (A+ to F)
+- Satellite environment: vegetation coverage %, urban density %, water body coverage %, NDVI index (-1 to 1), land surface temperature (°C)
+- Eco travel tips: 3 short tips for eco-friendly travel
+Be realistic and accurate based on the location.`,
       response_json_schema: {
         type: "object",
         properties: {
-          destination: { type: "string" },
-          country: { type: "string" },
-          coordinates: {
-            type: "object",
-            properties: { lat: { type: "number" }, lng: { type: "number" } }
-          },
-          weather: {
-            type: "object",
-            properties: {
-              temp: { type: "number" },
-              feels_like: { type: "number" },
-              humidity: { type: "number" },
-              wind_speed: { type: "number" },
-              description: { type: "string" },
-              icon: { type: "string" }
-            }
-          },
-          forecast: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                day: { type: "string" },
-                high: { type: "number" },
-                low: { type: "number" },
-                description: { type: "string" },
-                icon: { type: "string" }
-              }
-            }
-          },
-          air_quality: {
-            type: "object",
-            properties: {
-              aqi: { type: "number" },
-              category: { type: "string" },
-              main_pollutant: { type: "string" }
-            }
-          },
-          pollution: {
-            type: "object",
-            properties: {
-              pm25: { type: "number" },
-              pm10: { type: "number" },
-              no2: { type: "number" },
-              o3: { type: "number" },
-              co: { type: "number" }
-            }
-          },
           carbon: {
             type: "object",
             properties: {
@@ -86,15 +40,6 @@ Use realistic and accurate data based on the location. Return as JSON.`,
               transport_index: { type: "number" },
               industry_index: { type: "number" },
               carbon_score: { type: "string" }
-            }
-          },
-          atmosphere: {
-            type: "object",
-            properties: {
-              uv_index: { type: "number" },
-              visibility_km: { type: "number" },
-              pressure_hpa: { type: "number" },
-              dew_point: { type: "number" }
             }
           },
           satellite: {
@@ -112,8 +57,9 @@ Use realistic and accurate data based on the location. Return as JSON.`,
       }
     });
 
-    setResult(data);
+    setResult({ ...weatherData, ...llmData });
     setLoading(false);
+    setLoadingStep("");
   };
 
   return (
@@ -124,7 +70,7 @@ Use realistic and accurate data based on the location. Return as JSON.`,
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search a destination..."
+            placeholder="Search a destination... (e.g. Tokyo, Paris, Mumbai)"
             className="pl-9 rounded-2xl h-12 bg-card border-border/50"
           />
         </div>
@@ -134,9 +80,10 @@ Use realistic and accurate data based on the location. Return as JSON.`,
       </form>
 
       {loading && (
-        <div className="bg-card rounded-3xl border border-border/50 p-6 text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Fetching live data for <span className="font-medium text-foreground">{query}</span>...</p>
+        <div className="bg-card rounded-3xl border border-border/50 p-6 text-center space-y-2">
+          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+          <p className="text-sm font-medium text-foreground">{query}</p>
+          <p className="text-xs text-muted-foreground">{loadingStep}</p>
         </div>
       )}
 
