@@ -30,16 +30,16 @@ const SATELLITE_LAYERS = [
   {
     id: "truecolor",
     label: "True Color",
-    getUrl: (date) => gibsUrl("VIIRS_NOAA20_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
-    desc: "NASA VIIRS NOAA-20 · 375m · Daily",
-    maxZoom: 9,
+    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
+    desc: "Esri World Imagery · High Resolution",
+    maxZoom: 19,
   },
   {
     id: "viirs",
-    label: "VIIRS Day",
-    getUrl: (date) => gibsUrl("VIIRS_SNPP_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
-    desc: "NASA VIIRS Suomi NPP · 375m · Daily",
-    maxZoom: 9,
+    label: "Street Map",
+    getUrl: (_date) => `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png`,
+    desc: "Carto Voyager · Street Map",
+    maxZoom: 19,
   },
   {
     id: "vegetation",
@@ -50,10 +50,10 @@ const SATELLITE_LAYERS = [
   },
   {
     id: "fires",
-    label: "Fires",
-    getUrl: (date) => gibsUrl("MODIS_Terra_Thermal_Anomalies_All", date, "GoogleMapsCompatible_Level8", "png"),
-    desc: "NASA Thermal Anomalies · Daily",
-    maxZoom: 8,
+    label: "Terrain",
+    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}`,
+    desc: "Esri World Topo Map",
+    maxZoom: 19,
   },
 ];
 
