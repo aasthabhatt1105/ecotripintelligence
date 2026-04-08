@@ -1,0 +1,41 @@
+{
+  "name": "Itinerary",
+  "type": "object",
+  "properties": {
+    "destination": {
+      "type": "string"
+    },
+    "duration_days": {
+      "type": "number"
+    },
+    "preferences": {
+      "type": "string",
+      "description": "User preferences as text"
+    },
+    "plan_json": {
+      "type": "string",
+      "description": "Full itinerary as JSON string"
+    },
+    "satellite_data_json": {
+      "type": "string",
+      "description": "Mock satellite data as JSON string"
+    },
+    "total_carbon_budget_kg": {
+      "type": "number"
+    },
+    "eco_score": {
+      "type": "string",
+      "enum": [
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "F"
+      ]
+    }
+  },
+  "required": [
+    "destination"
+  ]
+}

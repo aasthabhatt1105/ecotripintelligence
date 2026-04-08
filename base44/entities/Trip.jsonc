@@ -1,0 +1,73 @@
+{
+  "name": "Trip",
+  "type": "object",
+  "properties": {
+    "transport_mode": {
+      "type": "string",
+      "enum": [
+        "walking",
+        "cycling",
+        "electric_bus",
+        "train"
+      ],
+      "description": "Transport mode used"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "distance_km": {
+      "type": "number",
+      "default": 0,
+      "description": "Total distance in kilometers"
+    },
+    "co2_saved_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "CO2 saved vs car travel in kg"
+    },
+    "eco_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Eco points earned"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Trip duration in seconds"
+    },
+    "start_lat": {
+      "type": "number"
+    },
+    "start_lng": {
+      "type": "number"
+    },
+    "end_lat": {
+      "type": "number"
+    },
+    "end_lng": {
+      "type": "number"
+    },
+    "waypoints": {
+      "type": "string",
+      "description": "JSON string of waypoint coordinates"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "transport_mode",
+    "status"
+  ]
+}
