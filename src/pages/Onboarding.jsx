@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Leaf, Footprints, Bike, Bus, TrainFront, ArrowRight } from "lucide-react";
+import { Leaf, Footprints, Bike, Bus, TrainFront, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
@@ -31,7 +31,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -44,6 +44,14 @@ export default function Onboarding() {
           </div>
           <span className="text-2xl font-bold">EcoTrip</span>
         </div>
+
+        {/* Back button */}
+        <button
+          onClick={() => step === 1 ? navigate("/") : setStep(1)}
+          className="absolute top-6 left-6 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
 
         {/* Step indicator */}
         <div className="flex gap-2 mb-8 justify-center">
