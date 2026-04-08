@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Home, Navigation, MessageSquare, User, Leaf } from "lucide-react";
 import { motion } from "framer-motion";
+import VoiceAssistant from "./VoiceAssistant";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
@@ -56,6 +57,9 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Floating Voice Assistant */}
+      <VoiceAssistant />
     </div>
   );
 }
