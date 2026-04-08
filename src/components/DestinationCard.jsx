@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapContainer, TileLayer, CircleMarker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import { Wind, Droplets, Thermometer, Eye, Gauge, Sun, Factory, Car, MapPin, Calendar, ChevronLeft, ChevronRight, Satellite } from "lucide-react";
-import { format, subDays, addDays, parseISO } from "date-fns";
+import { format, subDays, addDays } from "date-fns";
 
 const AQI_COLORS = {
   Good: "text-green-600 bg-green-100",
@@ -26,12 +26,6 @@ const SATELLITE_LAYERS = [
   { id: "ocean", label: "Physical", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}", desc: "Physical Map" },
 ];
 
-function ChangeView({ center, zoom }) {
-  const map = useMap();
-  map.setView(center, zoom);
-  return null;
-}
-
 function PollutantBar({ label, value, max, unit }) {
   const pct = Math.min((value / max) * 100, 100);
   const color = pct < 33 ? "bg-green-500" : pct < 66 ? "bg-yellow-500" : "bg-red-500";
@@ -52,7 +46,7 @@ function SatelliteView({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeLayer, setActiveLayer] = useState("imagery");
-  const [zoom, setZoom] = useState(11);
+  const [zoom] = useState(11);
 
   const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
 
@@ -133,15 +127,14 @@ function SatelliteView({ data }) {
       {/* Map */}
       <div className="rounded-2xl overflow-hidden border border-border/50 h-56 relative">
         <MapContainer
+          key={`${activeLayer}-${format(selectedDate, "yyyy-MM-dd")}-${lat}-${lng}`}
           center={[lat, lng]}
           zoom={zoom}
           className="h-full w-full"
           zoomControl={true}
           scrollWheelZoom={true}
         >
-          <ChangeView center={[lat, lng]} zoom={zoom} />
           <TileLayer
-            key={`${activeLayer}-${format(selectedDate, "yyyy-MM-dd")}`}
             url={layer.url}
             attribution={`Tiles © Esri — ${layer.desc}`}
             maxZoom={18}
