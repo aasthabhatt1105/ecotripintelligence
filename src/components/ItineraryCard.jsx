@@ -43,15 +43,16 @@ export default function ItineraryCard({ itinerary, weather }) {
       </div>
 
       {/* Weather */}
-      {weather && (
+      {weather && weather.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {weather.slice(0, 5).map((day, i) => {
             const WeatherIcon = weatherIcons[day.condition] || Sun;
             return (
               <div key={i} className="bg-card rounded-xl border border-border/50 p-2.5 text-center min-w-[64px] shrink-0">
-                <div className="text-[10px] text-muted-foreground">Day {i + 1}</div>
+                <div className="text-[10px] text-muted-foreground">{day.day || `Day ${i + 1}`}</div>
                 <WeatherIcon className="w-4 h-4 mx-auto my-1 text-accent" />
-                <div className="text-xs font-bold">{day.temp}°</div>
+                <div className="text-xs font-bold">{day.temp}°C</div>
+                <div className="text-[9px] text-muted-foreground">{day.condition}</div>
               </div>
             );
           })}

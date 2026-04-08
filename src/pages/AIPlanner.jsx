@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import SatelliteDataBadge from "../components/SatelliteDataBadge";
 import ItineraryCard from "../components/ItineraryCard";
-import { generateSatelliteData, generateWeatherForecast } from "../lib/ecoUtils";
+
 
 const QUICK_DESTINATIONS = [
   { label: "🇨🇷 Costa Rica", value: "Costa Rica" },
@@ -35,40 +35,24 @@ export default function AIPlanner() {
     setInput("");
     setLoading(true);
 
-    const satData = generateSatelliteData(
-      10 + Math.random() * 40,
-      -10 + Math.random() * 140
-    );
-    const weather = generateWeatherForecast(destination);
+    const prompt = `You are an eco-travel AI planner with access to real-world data. For the destination "${destination}", generate:
 
-    const prompt = `You are an eco-travel AI planner. Generate a 5-day sustainable travel itinerary for ${destination}.
+1. A 5-day sustainable travel itinerary
+2. Real current environmental data for the destination including:
+   - Current NDVI (vegetation index, realistic value for the region)
+   - Air Quality Index (realistic current value)
+   - Water quality index (0-100)
+   - Land surface temperature (°C, realistic for current season)
+   - Current weather: temperature (°C), condition, humidity %, wind speed km/h
+   - 5-day weather forecast
 
-Return a JSON object with this exact structure:
-{
-  "destination_summary": "Brief eco-friendly description of the destination",
-  "eco_score": "A or A+ or B",
-  "total_carbon_budget_kg": number,
-  "transport_options": [
-    {"mode": "string", "carbon_per_km": number, "recommended": boolean, "description": "string"}
-  ],
-  "daily_schedule": [
-    {
-      "day": number,
-      "title": "string",
-      "activities": [
-        {"time": "string", "activity": "string", "eco_tip": "string", "carbon_impact": "low/medium/high"}
-      ]
-    }
-  ],
-  "sustainability_features": ["string"],
-  "packing_list": ["string"],
-  "emergency_contacts": [{"name": "string", "number": "string"}]
-}
+Use real knowledge about this location's climate, environment, and current conditions. Be accurate and realistic.
 
-Make it realistic, detailed, and focused on eco-friendly options. Include local eco-certified accommodations, green transport, and nature-based activities.`;
+Return a JSON object.`;
 
     const result = await base44.integrations.Core.InvokeLLM({
       prompt,
+      add_context_from_internet: true,
       response_json_schema: {
         type: "object",
         properties: {
@@ -118,6 +102,35 @@ Make it realistic, detailed, and focused on eco-friendly options. Include local 
               properties: { name: { type: "string" }, number: { type: "string" } },
             },
           },
+          satellite_data: {
+            type: "object",
+            properties: {
+              ndvi: { type: "number" },
+              airQualityIndex: { type: "number" },
+              waterQuality: { type: "number" },
+              landSurfaceTemp: { type: "number" },
+            },
+          },
+          weather: {
+            type: "object",
+            properties: {
+              temp: { type: "number" },
+              condition: { type: "string" },
+              humidity: { type: "number" },
+              wind_speed: { type: "number" },
+            },
+          },
+          forecast: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                day: { type: "string" },
+                temp: { type: "number" },
+                condition: { type: "string" },
+              },
+            },
+          },
         },
       },
     });
@@ -127,7 +140,7 @@ Make it realistic, detailed, and focused on eco-friendly options. Include local 
       destination,
       duration_days: 5,
       plan_json: JSON.stringify(result),
-      satellite_data_json: JSON.stringify(satData),
+      satellite_data_json: JSON.stringify(result.satellite_data),
       total_carbon_budget_kg: result.total_carbon_budget_kg,
       eco_score: result.eco_score,
     });
@@ -137,8 +150,8 @@ Make it realistic, detailed, and focused on eco-friendly options. Include local 
       {
         role: "ai",
         content: `Here's your eco-friendly itinerary for **${destination}**! 🌍`,
-        satelliteData: satData,
-        weather,
+        satelliteData: result.satellite_data,
+        weather: result.forecast,
         itinerary: result,
       },
     ]);
