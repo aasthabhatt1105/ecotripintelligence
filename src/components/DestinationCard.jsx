@@ -18,12 +18,39 @@ const CARBON_COLORS = {
 
 const TABS = ["Weather", "Air Quality", "Carbon", "Satellite"];
 
-// Map layer types for different satellite views
+// NASA GIBS satellite layers — real daily imagery, no API key required
+// EPSG:3857 (Web Mercator) endpoint with time dimension
+const GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best";
+
+function gibsUrl(layer, date, tileMatrixSet, format) {
+  return `${GIBS_BASE}/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
+}
+
 const SATELLITE_LAYERS = [
-  { id: "imagery", label: "True Color", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", desc: "Esri World Imagery" },
-  { id: "terrain", label: "Terrain", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", desc: "Topographic" },
-  { id: "ndvi", label: "Vegetation", url: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}", desc: "National Geographic" },
-  { id: "ocean", label: "Physical", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}", desc: "Physical Map" },
+  {
+    id: "truecolor",
+    label: "True Color",
+    getUrl: (date) => gibsUrl("MODIS_Terra_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
+    desc: "NASA MODIS Terra · Daily",
+  },
+  {
+    id: "viirs",
+    label: "VIIRS",
+    getUrl: (date) => gibsUrl("VIIRS_NOAA20_CorrectedReflectance_TrueColor", date, "GoogleMapsCompatible_Level9", "jpg"),
+    desc: "NASA VIIRS NOAA-20 · Daily",
+  },
+  {
+    id: "vegetation",
+    label: "Vegetation",
+    getUrl: (date) => gibsUrl("MODIS_Terra_NDVI_8Day", date, "GoogleMapsCompatible_Level7", "png"),
+    desc: "NASA NDVI 8-Day · MODIS",
+  },
+  {
+    id: "fires",
+    label: "Fires",
+    getUrl: (date) => gibsUrl("MODIS_Terra_Thermal_Anomalies_All", date, "GoogleMapsCompatible_Level8", "png"),
+    desc: "NASA Thermal Anomalies · Daily",
+  },
 ];
 
 function PollutantBar({ label, value, max, unit }) {
@@ -49,6 +76,8 @@ function SatelliteView({ data }) {
   const [zoom] = useState(11);
 
   const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
+  const dateStr = format(selectedDate, "yyyy-MM-dd");
+  const tileUrl = layer.getUrl(dateStr);
 
   // Generate last 30 days for the date picker strip
   const dateStrip = Array.from({ length: 14 }, (_, i) => subDays(new Date(), 13 - i));
@@ -127,7 +156,7 @@ function SatelliteView({ data }) {
       {/* Map */}
       <div className="rounded-2xl overflow-hidden border border-border/50 h-56 relative">
         <MapContainer
-          key={`${activeLayer}-${format(selectedDate, "yyyy-MM-dd")}-${lat}-${lng}`}
+          key={`${activeLayer}-${dateStr}-${lat}-${lng}`}
           center={[lat, lng]}
           zoom={zoom}
           className="h-full w-full"
@@ -135,9 +164,10 @@ function SatelliteView({ data }) {
           scrollWheelZoom={true}
         >
           <TileLayer
-            url={layer.url}
-            attribution={`Tiles © Esri — ${layer.desc}`}
-            maxZoom={18}
+            url={tileUrl}
+            attribution={`Imagery © <a href="https://earthdata.nasa.gov">NASA EOSDIS GIBS</a> — ${layer.desc}`}
+            maxZoom={9}
+            tileSize={256}
           />
           <CircleMarker
             center={[lat, lng]}
@@ -149,7 +179,7 @@ function SatelliteView({ data }) {
         {/* Layer badge overlay */}
         <div className="absolute bottom-2 left-2 z-[999] bg-black/60 text-white text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm flex items-center gap-1">
           <Satellite className="w-3 h-3" />
-          {layer.label} · {format(selectedDate, "dd MMM yyyy")}
+          NASA GIBS · {layer.label} · {format(selectedDate, "dd MMM yyyy")}
         </div>
       </div>
 
@@ -165,7 +195,7 @@ function SatelliteView({ data }) {
             { label: "Vegetation", value: `${displayVeg}%`, icon: "🛰️", sub: "Coverage" },
             { label: "Urban", value: `${data.satellite?.urban_density_pct ?? "—"}%`, icon: "🏙️", sub: "Density" },
             { label: "Water", value: `${data.satellite?.water_coverage_pct ?? "—"}%`, icon: "💧", sub: "Coverage" },
-            { label: "Resolution", value: "10m", icon: "📷", sub: "Sentinel-2" },
+            { label: "Resolution", value: "250m", icon: "📷", sub: "MODIS/VIIRS" },
           ].map((item) => (
             <div key={item.label} className="bg-card rounded-xl p-2 text-center border border-border/30">
               <div className="text-base mb-0.5">{item.icon}</div>
