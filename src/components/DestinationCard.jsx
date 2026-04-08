@@ -1,8 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, useMap } from "react-leaflet";
 import { Wind, Droplets, Thermometer, Eye, Gauge, Sun, Factory, Car, MapPin, Calendar, ChevronLeft, ChevronRight, Satellite } from "lucide-react";
 import { format, subDays, addDays } from "date-fns";
+
+function InvalidateSize() {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => map.invalidateSize(), 100);
+  }, [map]);
+  return null;
+}
 
 const AQI_COLORS = {
   Good: "text-green-600 bg-green-100",
@@ -158,15 +166,16 @@ function SatelliteView({ data }) {
       </div>
 
       {/* Map */}
-      <div className="rounded-2xl overflow-hidden border border-border/50 h-56 relative">
+      <div className="rounded-2xl border border-border/50 relative" style={{ height: "224px" }}>
         <MapContainer
           key={`${activeLayer}-${dateStr}-${lat}-${lng}`}
           center={[lat, lng]}
           zoom={zoom}
-          className="h-full w-full"
+          style={{ height: "100%", width: "100%", borderRadius: "1rem" }}
           zoomControl={true}
           scrollWheelZoom={true}
         >
+          <InvalidateSize />
           <TileLayer
             url={tileUrl}
             attribution={`Imagery © ${layer.desc}`}
