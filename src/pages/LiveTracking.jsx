@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from "react-leaflet";
-import { Play, Square, Footprints, Bike, Bus, TrainFront, Leaf, Timer, Route, Gauge } from "lucide-react";
+import { Play, Square, Footprints, Bike, Bus, TrainFront, Leaf, Timer, Route, Gauge, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -177,6 +177,16 @@ export default function LiveTracking() {
               pathOptions={{ color: "hsl(122, 39%, 49%)", fillColor: "hsl(122, 39%, 49%)", fillOpacity: 1, weight: 3 }}
             />
           </MapContainer>
+        )}
+
+        {/* Back button */}
+        {!tracking && (
+          <button
+            onClick={() => navigate("/")}
+            className="absolute top-5 left-5 z-[1000] flex items-center gap-2 glass rounded-2xl px-4 py-2 border border-border/50 text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         )}
 
         {/* Live indicator */}
