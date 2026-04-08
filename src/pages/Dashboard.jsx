@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import EcoScoreCircle from "../components/EcoScoreCircle";
 import StatsCard from "../components/StatsCard";
 import TripCard from "../components/TripCard";
+import DestinationSearch from "../components/DestinationSearch";
 import { getEcoGrade, co2ToTrees } from "../lib/ecoUtils";
 
 export default function Dashboard() {
@@ -93,6 +94,12 @@ export default function Dashboard() {
           color="accent"
           delay={0.25}
         />
+      </div>
+
+      {/* Destination Search */}
+      <div>
+        <h2 className="text-base font-bold mb-3">🔍 Explore Destination</h2>
+        <DestinationSearch />
       </div>
 
       {/* Quick Actions */}
