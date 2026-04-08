@@ -21,7 +21,7 @@ export default function Layout() {
           <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <Leaf className="w-4 h-4 text-primary" />
           </div>
-          <span className="text-lg font-bold text-foreground">EcoTrip</span>
+          <span className="text-lg font-bold text-foreground">EcoTrip Intelligence</span>
         </div>
 
         <nav className="flex items-center gap-1">
