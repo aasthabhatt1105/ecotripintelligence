@@ -16,10 +16,10 @@ export default function Profile() {
 
   useEffect(() => {
     async function load() {
-      const [me, allTrips, allAchievements] = await Promise.all([
-        base44.auth.me(),
-        base44.entities.Trip.filter({ status: "completed" }, "-created_date", 100),
-        base44.entities.Achievement.list("-created_date", 100),
+      const me = await base44.auth.me();
+      const [allTrips, allAchievements] = await Promise.all([
+        base44.entities.Trip.filter({ status: "completed", created_by: me.email }, "-created_date", 100),
+        base44.entities.Achievement.filter({ created_by: me.email }, "-created_date", 100),
       ]);
       setUser(me);
       setTrips(allTrips);
@@ -82,6 +82,7 @@ export default function Profile() {
         <div>
           <h2 className="text-lg font-bold">{user?.full_name || "Eco Explorer"}</h2>
           <p className="text-xs text-muted-foreground">{user?.email}</p>
+          {user?.bio && <p className="text-xs text-muted-foreground mt-1 italic">"{user.bio}"</p>}
           <div className="flex items-center gap-1 mt-2">
             <Award className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs font-medium text-primary">{trips.length} trips completed</span>

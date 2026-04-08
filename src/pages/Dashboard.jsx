@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Leaf, TreePine, Zap, Navigation, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
@@ -10,18 +10,25 @@ import DestinationSearch from "../components/DestinationSearch";
 import { getEcoGrade, co2ToTrees } from "../lib/ecoUtils";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [me, allTrips] = await Promise.all([
-        base44.auth.me(),
-        base44.entities.Trip.filter({ status: "completed" }, "-created_date", 50),
-      ]);
+      const me = await base44.auth.me();
+      if (!me.onboarded) {
+        navigate("/onboarding");
+        return;
+      }
+      const userTrips = await base44.entities.Trip.filter(
+        { status: "completed", created_by: me.email },
+        "-created_date",
+        50
+      );
       setUser(me);
-      setTrips(allTrips);
+      setTrips(userTrips);
       setLoading(false);
     }
     load();

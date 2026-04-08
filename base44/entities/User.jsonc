@@ -1,0 +1,36 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "description": "The role of the user in the app"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio or motivation for eco travel"
+    },
+    "preferred_transport": {
+      "type": "string",
+      "enum": [
+        "walking",
+        "cycling",
+        "electric_bus",
+        "train"
+      ],
+      "description": "Preferred transport mode"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has completed onboarding"
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

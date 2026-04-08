@@ -11,6 +11,7 @@ import LiveTracking from './pages/LiveTracking';
 import AIPlanner from './pages/AIPlanner';
 import Profile from './pages/Profile';
 import TripDetail from './pages/TripDetail';
+import Onboarding from './pages/Onboarding';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,6 +39,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/planner" element={<AIPlanner />} />
