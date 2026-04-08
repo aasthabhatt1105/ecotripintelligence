@@ -34,34 +34,40 @@ function gibsUrl(layer, date, tileMatrixSet, format) {
   return `${GIBS_BASE}/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
 }
 
+// NASA GIBS WMTS — real daily satellite imagery, no API key required
+// Zoom capped at 8 for GIBS layers (their max tile matrix level)
 const SATELLITE_LAYERS = [
   {
     id: "truecolor",
     label: "True Color",
-    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
-    desc: "Esri World Imagery · High Resolution",
-    maxZoom: 19,
+    getUrl: (date) => `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+    desc: "NASA VIIRS NOAA-20 · True Color · Daily",
+    maxZoom: 9,
+    gibsZoom: 6,
   },
   {
-    id: "viirs",
-    label: "Street Map",
-    getUrl: (_date) => `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png`,
-    desc: "Carto Voyager · Street Map",
-    maxZoom: 19,
+    id: "viirs_snpp",
+    label: "VIIRS SNPP",
+    getUrl: (date) => `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+    desc: "NASA VIIRS Suomi-NPP · True Color · Daily",
+    maxZoom: 9,
+    gibsZoom: 6,
   },
   {
-    id: "vegetation",
-    label: "Vegetation",
-    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
-    desc: "Esri World Imagery · High Resolution",
-    maxZoom: 19,
+    id: "modis_terra",
+    label: "MODIS Terra",
+    getUrl: (date) => `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+    desc: "NASA MODIS Terra · True Color · Daily",
+    maxZoom: 9,
+    gibsZoom: 6,
   },
   {
-    id: "fires",
-    label: "Terrain",
-    getUrl: (_date) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}`,
-    desc: "Esri World Topo Map",
-    maxZoom: 19,
+    id: "modis_aqua",
+    label: "MODIS Aqua",
+    getUrl: (date) => `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
+    desc: "NASA MODIS Aqua · True Color · Daily",
+    maxZoom: 9,
+    gibsZoom: 6,
   },
 ];
 
@@ -85,7 +91,7 @@ function SatelliteView({ data }) {
   const { lat, lng } = data.coordinates || { lat: 51.5, lng: -0.1 };
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeLayer, setActiveLayer] = useState("truecolor");
-  const [zoom] = useState(13);
+  const [zoom] = useState(6);
 
   const layer = SATELLITE_LAYERS.find(l => l.id === activeLayer);
   const dateStr = format(selectedDate, "yyyy-MM-dd");
@@ -192,7 +198,7 @@ function SatelliteView({ data }) {
         {/* Layer badge overlay */}
         <div className="absolute bottom-2 left-2 z-[999] bg-black/60 text-white text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm flex items-center gap-1">
           <Satellite className="w-3 h-3" />
-          NASA GIBS · {layer.label} · {format(selectedDate, "dd MMM yyyy")}
+          🛰️ {layer.desc} · {format(selectedDate, "dd MMM yyyy")}
         </div>
       </div>
 
@@ -208,7 +214,7 @@ function SatelliteView({ data }) {
             { label: "Vegetation", value: `${displayVeg}%`, icon: "🛰️", sub: "Coverage" },
             { label: "Urban", value: `${data.satellite?.urban_density_pct ?? "—"}%`, icon: "🏙️", sub: "Density" },
             { label: "Water", value: `${data.satellite?.water_coverage_pct ?? "—"}%`, icon: "💧", sub: "Coverage" },
-            { label: "Resolution", value: "375m", icon: "📷", sub: "VIIRS/Esri" },
+            { label: "Resolution", value: "375m", icon: "📷", sub: "NASA GIBS" },
           ].map((item) => (
             <div key={item.label} className="bg-card rounded-xl p-2 text-center border border-border/30">
               <div className="text-base mb-0.5">{item.icon}</div>
