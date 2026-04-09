@@ -1,11 +1,12 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Home, Navigation, MessageSquare, User, Leaf } from "lucide-react";
+import { Home, Navigation, MessageSquare, User, Leaf, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import VoiceAssistant from "./VoiceAssistant";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/track", icon: Navigation, label: "Track" },
+  { path: "/history", icon: Clock, label: "History" },
   { path: "/planner", icon: MessageSquare, label: "Planner" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
