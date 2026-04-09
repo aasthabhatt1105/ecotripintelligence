@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import SatelliteDataBadge from "../components/SatelliteDataBadge";
 import ItineraryCard from "../components/ItineraryCard";
+import DayTripsCard from "../components/DayTripsCard";
 
 const QUICK_DESTINATIONS = [
   { label: "🇨🇷 Costa Rica", value: "Costa Rica" },
@@ -69,6 +70,7 @@ Also include:
 - 3+ restaurant recommendations matching the traveller's dietary preferences with eco-credentials
 - 5-day weather forecast
 - Sustainable transport options
+- 4 nearby day trip destinations (within 1-3 hours travel) each with: a full day itinerary (hourly schedule), all available local transport options (bus/train/metro/cycling/walking) with route info, duration, frequency, cost and CO2 per option
 
 Be accurate, realistic, and location-specific.`;
 
@@ -151,6 +153,45 @@ Be accurate, realistic, and location-specific.`;
               },
             },
           },
+          day_trips: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                emoji: { type: "string" },
+                description: { type: "string" },
+                distance_from_base: { type: "string" },
+                eco_rating: { type: "string" },
+                best_time: { type: "string" },
+                transport_options: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      mode: { type: "string" },
+                      route_info: { type: "string" },
+                      duration: { type: "string" },
+                      frequency: { type: "string" },
+                      cost: { type: "string" },
+                      carbon_kg: { type: "number" },
+                    },
+                  },
+                },
+                day_itinerary: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      time: { type: "string" },
+                      activity: { type: "string" },
+                      eco_tip: { type: "string" },
+                    },
+                  },
+                },
+              },
+            },
+          },
           sustainability_features: { type: "array", items: { type: "string" } },
           satellite_data: {
             type: "object",
@@ -194,6 +235,7 @@ Be accurate, realistic, and location-specific.`;
         satelliteData: result.satellite_data,
         weather: result.forecast,
         itinerary: result,
+        dayTrips: result.day_trips,
       },
     ]);
     setLoading(false);
@@ -329,6 +371,11 @@ Be accurate, realistic, and location-specific.`;
                 {msg.itinerary && (
                   <div className="ml-9">
                     <ItineraryCard itinerary={msg.itinerary} weather={msg.weather} />
+                    {msg.dayTrips?.length > 0 && (
+                      <div className="mt-3">
+                        <DayTripsCard dayTrips={msg.dayTrips} />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
