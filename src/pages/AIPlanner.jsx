@@ -51,179 +51,184 @@ export default function AIPlanner() {
 
   const generateItinerary = async (destination) => {
     const dietaryStr = dietaryPrefs.length > 0
-      ? `The traveller has these dietary preferences/restrictions: ${dietaryPrefs.join(", ")}.`
-      : "No specific dietary restrictions.";
+      ? `Dietary preferences/restrictions: ${dietaryPrefs.join(", ")}.`
+      : "No dietary restrictions.";
 
     const userLabel = destination + (dietaryPrefs.length > 0 ? ` (${dietaryPrefs.join(", ")})` : "");
     setMessages((prev) => [...prev, { role: "user", content: userLabel }]);
     setInput("");
     setLoading(true);
 
-    const prompt = `You are an expert eco-travel AI planner. For the destination "${destination}", generate a comprehensive 5-day sustainable travel plan.
+    // Call 1: main itinerary (no internet search to keep response tight)
+    const mainPrompt = `Eco-travel planner. Destination: "${destination}". ${dietaryStr}
+Generate: 5-day sustainable itinerary, transport options, ${includePacking ? "packing list (essentials/clothing/eco_items)," : ""} ${includeAccommodations ? "3 eco accommodations," : ""} 3+ restaurants with dietary tags, satellite environmental data, 5-day forecast, sustainability features. Be concise.`;
 
-${dietaryStr}
-${includePacking ? "Include a detailed weather-appropriate packing list." : ""}
-${includeAccommodations ? "Include 3 eco-friendly accommodation recommendations near key points of interest." : ""}
+    // Call 2: day trips
+    const dayTripsPrompt = `For "${destination}", suggest 4 nearby day trip destinations (1-3h travel). For each: name, emoji, short description, distance, eco rating (A+/A/B), best time to visit, 2 transport options (mode, route info, duration, frequency, cost, CO2 kg), 5-item day itinerary (time + activity + eco tip).`;
 
-Also include:
-- Real current environmental data (NDVI, AQI, water quality, land surface temp)
-- 3+ restaurant recommendations matching the traveller's dietary preferences with eco-credentials
-- 5-day weather forecast
-- Sustainable transport options
-- 4 nearby day trip destinations (within 1-3 hours travel) each with: a full day itinerary (hourly schedule), all available local transport options (bus/train/metro/cycling/walking) with route info, duration, frequency, cost and CO2 per option
-
-Be accurate, realistic, and location-specific.`;
-
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      add_context_from_internet: true,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          destination_summary: { type: "string" },
-          eco_score: { type: "string" },
-          total_carbon_budget_kg: { type: "number" },
-          transport_options: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                mode: { type: "string" },
-                carbon_per_km: { type: "number" },
-                recommended: { type: "boolean" },
-                description: { type: "string" },
+    const [mainResult, dayTripsResult] = await Promise.all([
+      base44.integrations.Core.InvokeLLM({
+        prompt: mainPrompt,
+        add_context_from_internet: false,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            destination_summary: { type: "string" },
+            eco_score: { type: "string" },
+            total_carbon_budget_kg: { type: "number" },
+            transport_options: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  mode: { type: "string" },
+                  carbon_per_km: { type: "number" },
+                  recommended: { type: "boolean" },
+                  description: { type: "string" },
+                },
               },
             },
-          },
-          daily_schedule: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                day: { type: "number" },
-                title: { type: "string" },
-                activities: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      time: { type: "string" },
-                      activity: { type: "string" },
-                      eco_tip: { type: "string" },
-                      carbon_impact: { type: "string" },
+            daily_schedule: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  day: { type: "number" },
+                  title: { type: "string" },
+                  activities: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        time: { type: "string" },
+                        activity: { type: "string" },
+                        eco_tip: { type: "string" },
+                        carbon_impact: { type: "string" },
+                      },
                     },
                   },
                 },
               },
             },
-          },
-          restaurants: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                cuisine: { type: "string" },
-                dietary_tags: { type: "array", items: { type: "string" } },
-                eco_credential: { type: "string" },
-                location: { type: "string" },
-                price_range: { type: "string" },
-              },
-            },
-          },
-          packing_list: {
-            type: "object",
-            properties: {
-              essentials: { type: "array", items: { type: "string" } },
-              clothing: { type: "array", items: { type: "string" } },
-              eco_items: { type: "array", items: { type: "string" } },
-            },
-          },
-          eco_accommodations: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                type: { type: "string" },
-                eco_features: { type: "array", items: { type: "string" } },
-                location: { type: "string" },
-                price_range: { type: "string" },
-                nearby_poi: { type: "string" },
-              },
-            },
-          },
-          day_trips: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                emoji: { type: "string" },
-                description: { type: "string" },
-                distance_from_base: { type: "string" },
-                eco_rating: { type: "string" },
-                best_time: { type: "string" },
-                transport_options: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      mode: { type: "string" },
-                      route_info: { type: "string" },
-                      duration: { type: "string" },
-                      frequency: { type: "string" },
-                      cost: { type: "string" },
-                      carbon_kg: { type: "number" },
-                    },
-                  },
-                },
-                day_itinerary: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      time: { type: "string" },
-                      activity: { type: "string" },
-                      eco_tip: { type: "string" },
-                    },
-                  },
+            restaurants: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  cuisine: { type: "string" },
+                  dietary_tags: { type: "array", items: { type: "string" } },
+                  eco_credential: { type: "string" },
+                  location: { type: "string" },
+                  price_range: { type: "string" },
                 },
               },
             },
-          },
-          sustainability_features: { type: "array", items: { type: "string" } },
-          satellite_data: {
-            type: "object",
-            properties: {
-              ndvi: { type: "number" },
-              airQualityIndex: { type: "number" },
-              waterQuality: { type: "number" },
-              landSurfaceTemp: { type: "number" },
-            },
-          },
-          forecast: {
-            type: "array",
-            items: {
+            packing_list: {
               type: "object",
               properties: {
-                day: { type: "string" },
-                temp: { type: "number" },
-                condition: { type: "string" },
+                essentials: { type: "array", items: { type: "string" } },
+                clothing: { type: "array", items: { type: "string" } },
+                eco_items: { type: "array", items: { type: "string" } },
+              },
+            },
+            eco_accommodations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  type: { type: "string" },
+                  eco_features: { type: "array", items: { type: "string" } },
+                  location: { type: "string" },
+                  price_range: { type: "string" },
+                  nearby_poi: { type: "string" },
+                },
+              },
+            },
+            sustainability_features: { type: "array", items: { type: "string" } },
+            satellite_data: {
+              type: "object",
+              properties: {
+                ndvi: { type: "number" },
+                airQualityIndex: { type: "number" },
+                waterQuality: { type: "number" },
+                landSurfaceTemp: { type: "number" },
+              },
+            },
+            forecast: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  day: { type: "string" },
+                  temp: { type: "number" },
+                  condition: { type: "string" },
+                },
               },
             },
           },
         },
-      },
-    });
+      }),
+      base44.integrations.Core.InvokeLLM({
+        prompt: dayTripsPrompt,
+        add_context_from_internet: false,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            day_trips: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  emoji: { type: "string" },
+                  description: { type: "string" },
+                  distance_from_base: { type: "string" },
+                  eco_rating: { type: "string" },
+                  best_time: { type: "string" },
+                  transport_options: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        mode: { type: "string" },
+                        route_info: { type: "string" },
+                        duration: { type: "string" },
+                        frequency: { type: "string" },
+                        cost: { type: "string" },
+                        carbon_kg: { type: "number" },
+                      },
+                    },
+                  },
+                  day_itinerary: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        time: { type: "string" },
+                        activity: { type: "string" },
+                        eco_tip: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    const combined = { ...mainResult, day_trips: dayTripsResult.day_trips };
 
     await base44.entities.Itinerary.create({
       destination,
       duration_days: 5,
-      plan_json: JSON.stringify(result),
-      satellite_data_json: JSON.stringify(result.satellite_data),
-      total_carbon_budget_kg: result.total_carbon_budget_kg,
-      eco_score: result.eco_score,
+      plan_json: JSON.stringify(combined),
+      satellite_data_json: JSON.stringify(mainResult.satellite_data),
+      total_carbon_budget_kg: mainResult.total_carbon_budget_kg,
+      eco_score: mainResult.eco_score,
       preferences: dietaryPrefs.join(","),
     });
 
@@ -232,10 +237,10 @@ Be accurate, realistic, and location-specific.`;
       {
         role: "ai",
         content: `Here's your personalised eco-friendly itinerary for **${destination}**! 🌍`,
-        satelliteData: result.satellite_data,
-        weather: result.forecast,
-        itinerary: result,
-        dayTrips: result.day_trips,
+        satelliteData: mainResult.satellite_data,
+        weather: mainResult.forecast,
+        itinerary: combined,
+        dayTrips: dayTripsResult.day_trips,
       },
     ]);
     setLoading(false);
