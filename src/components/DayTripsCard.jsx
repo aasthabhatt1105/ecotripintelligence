@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, MapPin, Bus, Train, Bike, Footprints, Clock, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Bus, Train, Bike, Footprints, Clock, Zap, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TRANSPORT_ICONS = {
@@ -108,7 +108,12 @@ export default function DayTripsCard({ dayTrips }) {
                             <div key={j} className="flex items-start gap-2 bg-card rounded-xl p-2 border border-border/30">
                               <TransportBadge mode={t.mode} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-xs font-medium">{t.route_info}</div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {t.service_number && (
+                                    <span className="text-xs font-bold text-foreground">{t.service_number}</span>
+                                  )}
+                                  <span className="text-xs text-muted-foreground">{t.route_info}</span>
+                                </div>
                                 <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground flex-wrap">
                                   <span>⏱ {t.duration}</span>
                                   {t.frequency && <span>🔄 {t.frequency}</span>}
@@ -119,6 +124,17 @@ export default function DayTripsCard({ dayTrips }) {
                                     </span>
                                   )}
                                 </div>
+                                {t.booking_url && (
+                                  <a
+                                    href={t.booking_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-secondary hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="w-2.5 h-2.5" /> Book Tickets
+                                  </a>
+                                )}
                               </div>
                             </div>
                           ))}
