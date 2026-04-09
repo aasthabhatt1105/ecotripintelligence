@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { getGradeColor } from "../lib/ecoUtils";
 
-export default function EcoScoreCircle({ grade = "C", points = 0, size = "lg" }) {
+export default function EcoScoreCircle({ grade = "F", points = 0, size = "lg" }) {
   const sizes = {
     sm: { outer: "w-20 h-20", text: "text-2xl", sub: "text-[9px]" },
     md: { outer: "w-28 h-28", text: "text-3xl", sub: "text-xs" },

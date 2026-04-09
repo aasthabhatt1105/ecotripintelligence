@@ -43,16 +43,25 @@ export default function LiveTracking() {
 
   const { steps, supported: stepSupported } = useStepCounter(tracking);
 
+  const [locationError, setLocationError] = useState(null);
+
   // Get initial position
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setCurrentPos([pos.coords.latitude, pos.coords.longitude]),
-        () => setCurrentPos([51.505, -0.09]),
-        { enableHighAccuracy: true }
+        (pos) => {
+          setCurrentPos([pos.coords.latitude, pos.coords.longitude]);
+          setLocationError(null);
+        },
+        (err) => {
+          setLocationError("Location access denied. Please enable GPS to track your trip.");
+          setCurrentPos(null);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
-      setCurrentPos([51.505, -0.09]);
+      setLocationError("Your browser does not support GPS tracking.");
+      setCurrentPos(null);
     }
   }, []);
 
@@ -156,6 +165,33 @@ export default function LiveTracking() {
     <div className="relative h-screen flex flex-col">
       {/* Map */}
       <div className="flex-1 relative">
+        {locationError && (
+          <div className="flex flex-col items-center justify-center h-full bg-muted/30 px-8 text-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <span className="text-3xl">📍</span>
+            </div>
+            <p className="text-sm font-medium text-destructive">{locationError}</p>
+            <button
+              onClick={() => {
+                setLocationError(null);
+                navigator.geolocation?.getCurrentPosition(
+                  (pos) => setCurrentPos([pos.coords.latitude, pos.coords.longitude]),
+                  () => setLocationError("Location access denied. Please enable GPS to track your trip."),
+                  { enableHighAccuracy: true, timeout: 10000 }
+                );
+              }}
+              className="text-xs bg-primary text-primary-foreground px-4 py-2 rounded-xl"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!locationError && !currentPos && (
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <p className="text-sm text-muted-foreground">Getting your location...</p>
+          </div>
+        )}
         {currentPos && (
           <MapContainer
             center={currentPos}
@@ -253,6 +289,7 @@ export default function LiveTracking() {
           {!showSummary && (
             <Button
               onClick={tracking ? stopTracking : startTracking}
+              disabled={!tracking && (!currentPos || !!locationError)}
               className={`w-full h-14 rounded-2xl text-base font-bold transition-all ${
                 tracking
                   ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"

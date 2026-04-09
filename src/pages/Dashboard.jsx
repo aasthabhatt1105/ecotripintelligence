@@ -75,9 +75,9 @@ export default function Dashboard() {
           <EcoScoreCircle grade={grade} points={totalPoints} />
           <p className="text-xs text-muted-foreground mt-2 font-medium">Eco Score</p>
         </motion.div>
-        <StatsCard icon={<Leaf className="w-4 h-4" />} label="CO₂ Saved" value={totalCO2.toFixed(1)} unit="kg" color="primary" delay={0.15} />
-        <StatsCard icon={<TreePine className="w-4 h-4" />} label="Trees Equiv." value={trees} color="emerald" delay={0.2} />
-        <StatsCard icon={<Zap className="w-4 h-4" />} label="Eco Points" value={totalPoints} color="accent" delay={0.25} />
+        <StatsCard icon={<Leaf className="w-4 h-4" />} label="CO₂ Saved" value={trips.length === 0 ? "—" : totalCO2.toFixed(1)} unit={trips.length > 0 ? "kg" : ""} color="primary" delay={0.15} />
+        <StatsCard icon={<TreePine className="w-4 h-4" />} label="Trees Equiv." value={trips.length === 0 ? "—" : trees} color="emerald" delay={0.2} />
+        <StatsCard icon={<Zap className="w-4 h-4" />} label="Eco Points" value={trips.length === 0 ? "—" : totalPoints} color="accent" delay={0.25} />
       </div>
 
       {/* Quick Actions */}
