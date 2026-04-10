@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import TripDetail from './pages/TripDetail';
 import Onboarding from './pages/Onboarding';
 import TripHistory from './pages/TripHistory';
+import Social from './pages/Social';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -46,6 +47,7 @@ const AuthenticatedApp = () => {
         <Route path="/planner" element={<AIPlanner />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<TripHistory />} />
+        <Route path="/social" element={<Social />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
       <Route path="/track" element={<LiveTracking />} />

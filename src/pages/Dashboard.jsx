@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Leaf, TreePine, Zap, Navigation, MessageSquare } from "lucide-react";
+import EcosiaWidget from "../components/EcosiaWidget";
 import { motion } from "framer-motion";
 import EcoScoreCircle from "../components/EcoScoreCircle";
 import StatsCard from "../components/StatsCard";
@@ -79,6 +80,11 @@ export default function Dashboard() {
         <StatsCard icon={<TreePine className="w-4 h-4" />} label="Trees Equiv." value={trips.length === 0 ? "—" : trees} color="emerald" delay={0.2} />
         <StatsCard icon={<Zap className="w-4 h-4" />} label="Eco Points" value={trips.length === 0 ? "—" : totalPoints} color="accent" delay={0.25} />
       </div>
+
+      {/* Ecosia Widget */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <EcosiaWidget totalCO2={totalCO2} />
+      </motion.div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { Home, Navigation, MessageSquare, User, Leaf, Clock } from "lucide-react";
+import { Home, Navigation, MessageSquare, User, Leaf, Clock, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import VoiceAssistant from "./VoiceAssistant";
 
@@ -8,6 +8,7 @@ const navItems = [
   { path: "/track", icon: Navigation, label: "Track" },
   { path: "/history", icon: Clock, label: "History" },
   { path: "/planner", icon: MessageSquare, label: "Planner" },
+  { path: "/social", icon: Users, label: "Social" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
 

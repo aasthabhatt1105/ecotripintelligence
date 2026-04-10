@@ -1,0 +1,34 @@
+{
+  "name": "Group",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "string"
+    },
+    "creator_email": {
+      "type": "string"
+    },
+    "member_emails": {
+      "type": "string",
+      "description": "JSON array of member emails"
+    },
+    "member_count": {
+      "type": "number",
+      "default": 1
+    },
+    "discount_unlocked": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name",
+    "creator_email"
+  ]
+}
