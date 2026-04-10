@@ -80,10 +80,16 @@ export default function Dashboard() {
         </motion.div>
         <StatsCard
           icon={
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2z" fill="rgba(34,197,94,0.15)" stroke="none"/>
-              <path d="M12 8c-2 0-4 1.5-4 4s2 4 4 4 4-1.5 4-4" stroke="#16a34a"/>
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83" stroke="#16a34a" strokeWidth="1.5"/>
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Cloud puffing smoke */}
+              <ellipse cx="12" cy="15" rx="7" ry="4.5" fill="#bbf7d0" stroke="#16a34a" strokeWidth="1.2"/>
+              <ellipse cx="9" cy="13" rx="4" ry="3.5" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2"/>
+              <ellipse cx="14" cy="12.5" rx="3.5" ry="3" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.2"/>
+              {/* CO2 text */}
+              <text x="9" y="16.5" fontSize="4.5" fontWeight="bold" fill="#15803d" fontFamily="monospace">CO₂</text>
+              {/* Arrow down = absorbed */}
+              <path d="M12 5 L12 9" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M10 7.5 L12 9.5 L14 7.5" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </svg>
           }
           label="CO₂ Saved"
@@ -94,12 +100,20 @@ export default function Dashboard() {
         />
         <StatsCard
           icon={
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22V12" stroke="#15803d" strokeWidth="2"/>
-              <path d="M12 12C12 12 8 9 8 6a4 4 0 0 1 8 0c0 3-4 6-4 6z" fill="#22c55e" stroke="#15803d" strokeWidth="1.5"/>
-              <path d="M12 16C12 16 7 14 5 11" stroke="#15803d" strokeWidth="1.5"/>
-              <path d="M12 14C12 14 17 12 19 9" stroke="#15803d" strokeWidth="1.5"/>
-              <path d="M7 22h10" stroke="#15803d" strokeWidth="2"/>
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Ground */}
+              <rect x="6" y="20" width="12" height="2" rx="1" fill="#a3e635" />
+              {/* Trunk */}
+              <rect x="11" y="14" width="2" height="6" rx="1" fill="#854d0e" />
+              {/* Branches */}
+              <path d="M12 14 L8 10" stroke="#854d0e" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M12 12 L16 8" stroke="#854d0e" strokeWidth="1.5" strokeLinecap="round"/>
+              {/* Canopy circles */}
+              <circle cx="12" cy="8" r="4.5" fill="#4ade80" stroke="#16a34a" strokeWidth="1"/>
+              <circle cx="8" cy="10" r="3" fill="#22c55e" stroke="#16a34a" strokeWidth="1"/>
+              <circle cx="16" cy="9" r="2.8" fill="#86efac" stroke="#16a34a" strokeWidth="1"/>
+              {/* Sparkle */}
+              <path d="M19 4 L19.5 5.5 L21 6 L19.5 6.5 L19 8 L18.5 6.5 L17 6 L18.5 5.5Z" fill="#fbbf24"/>
             </svg>
           }
           label="Trees Equiv."
@@ -109,8 +123,17 @@ export default function Dashboard() {
         />
         <StatsCard
           icon={
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#fb923c" stroke="#ea580c" strokeWidth="1.5"/>
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Star burst background */}
+              <circle cx="12" cy="12" r="9" fill="#fef9c3" stroke="#eab308" strokeWidth="1"/>
+              {/* Lightning bolt */}
+              <path d="M13.5 3.5 L7 13 L11.5 13 L10.5 20.5 L17 11 L12.5 11 Z" fill="#f59e0b" stroke="#d97706" strokeWidth="0.8"/>
+              {/* Shine rays */}
+              <line x1="12" y1="1" x2="12" y2="3" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="20" y1="5" x2="18.5" y2="6.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="23" y1="12" x2="21" y2="12" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="4" y1="12" x2="2" y2="12" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="4" y1="5" x2="5.5" y2="6.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           }
           label="Eco Points"
