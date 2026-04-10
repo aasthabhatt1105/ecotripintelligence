@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Leaf, TreePine, Zap, Navigation, MessageSquare } from "lucide-react";
+import { Navigation, MessageSquare } from "lucide-react";
 import EcosiaWidget from "../components/EcosiaWidget";
 import { motion } from "framer-motion";
 import EcoScoreCircle from "../components/EcoScoreCircle";
@@ -76,9 +76,46 @@ export default function Dashboard() {
           <EcoScoreCircle grade={grade} points={totalPoints} />
           <p className="text-xs text-muted-foreground mt-2 font-medium">Eco Score</p>
         </motion.div>
-        <StatsCard icon={<Leaf className="w-4 h-4" />} label="CO₂ Saved" value={trips.length === 0 ? "—" : totalCO2.toFixed(1)} unit={trips.length > 0 ? "kg" : ""} color="primary" delay={0.15} />
-        <StatsCard icon={<TreePine className="w-4 h-4" />} label="Trees Equiv." value={trips.length === 0 ? "—" : trees} color="emerald" delay={0.2} />
-        <StatsCard icon={<Zap className="w-4 h-4" />} label="Eco Points" value={trips.length === 0 ? "—" : totalPoints} color="accent" delay={0.25} />
+        <StatsCard
+          icon={
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2z" fill="rgba(34,197,94,0.15)" stroke="none"/>
+              <path d="M12 8c-2 0-4 1.5-4 4s2 4 4 4 4-1.5 4-4" stroke="#16a34a"/>
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83" stroke="#16a34a" strokeWidth="1.5"/>
+            </svg>
+          }
+          label="CO₂ Saved"
+          value={trips.length === 0 ? "—" : totalCO2.toFixed(1)}
+          unit={trips.length > 0 ? "kg" : ""}
+          color="green"
+          delay={0.15}
+        />
+        <StatsCard
+          icon={
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22V12" stroke="#15803d" strokeWidth="2"/>
+              <path d="M12 12C12 12 8 9 8 6a4 4 0 0 1 8 0c0 3-4 6-4 6z" fill="#22c55e" stroke="#15803d" strokeWidth="1.5"/>
+              <path d="M12 16C12 16 7 14 5 11" stroke="#15803d" strokeWidth="1.5"/>
+              <path d="M12 14C12 14 17 12 19 9" stroke="#15803d" strokeWidth="1.5"/>
+              <path d="M7 22h10" stroke="#15803d" strokeWidth="2"/>
+            </svg>
+          }
+          label="Trees Equiv."
+          value={trips.length === 0 ? "—" : trees}
+          color="emerald"
+          delay={0.2}
+        />
+        <StatsCard
+          icon={
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#fb923c" stroke="#ea580c" strokeWidth="1.5"/>
+            </svg>
+          }
+          label="Eco Points"
+          value={trips.length === 0 ? "—" : totalPoints}
+          color="accent"
+          delay={0.25}
+        />
       </div>
 
       {/* Ecosia Widget */}

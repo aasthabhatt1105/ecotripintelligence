@@ -5,10 +5,11 @@ export default function StatsCard({ icon, label, value, unit, color = "primary",
   const [hovered, setHovered] = useState(false);
 
   const colorMap = {
-    primary: "bg-primary/10 text-primary",
-    secondary: "bg-secondary/10 text-secondary",
-    accent: "bg-accent/10 text-accent",
-    emerald: "bg-emerald-100 text-emerald-600",
+    primary: "bg-green-50 dark:bg-green-900/20",
+    green: "bg-green-50 dark:bg-green-900/20",
+    secondary: "bg-blue-50 dark:bg-blue-900/20",
+    accent: "bg-orange-50 dark:bg-orange-900/20",
+    emerald: "bg-emerald-50 dark:bg-emerald-900/20",
   };
   const cls = colorMap[color] || colorMap.primary;
 
