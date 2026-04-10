@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Navigation, MessageSquare } from "lucide-react";
 import EcosiaWidget from "../components/EcosiaWidget";
+import DashboardAnimations from "../components/DashboardAnimations";
 import { motion } from "framer-motion";
 import EcoScoreCircle from "../components/EcoScoreCircle";
 import StatsCard from "../components/StatsCard";
@@ -50,7 +51,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      <DashboardAnimations />
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
